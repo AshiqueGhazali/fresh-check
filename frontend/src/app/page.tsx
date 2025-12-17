@@ -59,11 +59,11 @@ export default function HomePage() {
             <motion.div
               whileHover={{ rotate: 360 }}
               transition={{ duration: 0.6 }}
-              className="w-10 h-10 bg-linear-to-br from-[#15803d] to-[#22c55e] rounded-xl flex items-center justify-center shadow-lg"
+              className="w-10 h-10 bg-linear-to-br from-[#047857] to-[#10b981] rounded-xl flex items-center justify-center shadow-lg"
             >
               <ChefHat className="w-6 h-6 text-white" />
             </motion.div>
-            <span className="text-xl font-bold bg-linear-to-r from-[#15803d] to-[#22c55e] bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-linear-to-r from-[#047857] to-[#10b981] bg-clip-text text-transparent">
               FreshCheck
             </span>
           </div>
@@ -89,7 +89,7 @@ export default function HomePage() {
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
                 Food Quality
                 <br />
-                <span className="bg-linear-to-r from-[#15803d] to-[#22c55e] bg-clip-text text-transparent">
+                <span className="bg-linear-to-r from-[#047857] to-[#10b981] bg-clip-text text-transparent">
                   Redefined
                 </span>
               </h1>
@@ -102,7 +102,7 @@ export default function HomePage() {
                 <Link href="/login">
                   <Button 
                     size="lg" 
-                    className="group w-full sm:min-w-75 bg-linear-to-r from-[#15803d] to-[#22c55e] hover:from-[#22c55e] hover:to-[#15803d] text-white px-8 py-6 text-base shadow-lg hover:shadow-xl transition-all"
+                    className="group w-full sm:min-w-75 bg-linear-to-r from-[#047857] to-[#10b981] hover:from-[#10b981] hover:to-[#047857] text-white px-8 py-6 text-base shadow-lg hover:shadow-xl transition-all duration-1000"
                   >
                     Get Started
                     <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -184,7 +184,7 @@ export default function HomePage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6 }}
-        className="px-4 sm:px-6 lg:px-8 py-4 bg-[#4d7c0f] backdrop-blur-sm border-t border-gray-200"
+        className="px-4 sm:px-6 lg:px-8 py-4 bg-[#064e3b] backdrop-blur-sm border-t border-gray-200"
       >
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-gray-100 text-sm">
