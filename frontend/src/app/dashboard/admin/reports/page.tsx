@@ -1,0 +1,271 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { CheckCircle, XCircle, Clock } from 'lucide-react';
+import { motion } from 'framer-motion';
+import api from '@/lib/api';
+
+interface Report {
+  id: number;
+  status: string;
+  form: {
+    title: string;
+  };
+  inspector: {
+    name: string;
+  };
+  createdAt: string;
+  submittedAt: string | null;
+}
+
+export default function ReportsApprovalPage() {
+  const [reports, setReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(false);
+  
+  // Approval states
+  const [reportToApprove, setReportToApprove] = useState<number | null>(null);
+  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+
+  // Rejection states
+  const [reportToReject, setReportToReject] = useState<number | null>(null);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  const fetchReports = async () => {
+    try {
+      const response = await api.get('/reports');
+      setReports(response.data);
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+      toast.error('Failed to load reports');
+    }
+  };
+
+  const initiateApprove = (reportId: number) => {
+    setReportToApprove(reportId);
+    setShowApproveConfirm(true);
+  };
+
+  const handleConfirmApprove = async () => {
+    if (!reportToApprove) return;
+
+    setLoading(true);
+    try {
+      await api.put(`/reports/${reportToApprove}/approve`, { remarks: 'Approved' });
+      fetchReports();
+      toast.success('Report approved successfully!');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Error approving report');
+    } finally {
+      setLoading(false);
+      setShowApproveConfirm(false);
+      setReportToApprove(null);
+    }
+  };
+
+  const initiateReject = (reportId: number) => {
+    setReportToReject(reportId);
+    setRejectionReason('');
+    setShowRejectDialog(true);
+  };
+
+  const handleConfirmReject = async () => {
+    if (!reportToReject) return;
+    if (!rejectionReason.trim()) {
+      toast.error('Please provide a rejection reason');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await api.put(`/reports/${reportToReject}/reject`, { remarks: rejectionReason });
+      fetchReports();
+      toast.success('Report rejected successfully');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Error rejecting report');
+    } finally {
+      setLoading(false);
+      setShowRejectDialog(false);
+      setReportToReject(null);
+      setRejectionReason('');
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'SUBMITTED':
+        return <Badge className="bg-orange-500">Pending Review</Badge>;
+      case 'APPROVED':
+        return <Badge className="bg-green-500">Approved</Badge>;
+      case 'REJECTED':
+        return <Badge className="bg-red-500">Rejected</Badge>;
+      case 'DRAFT':
+        return <Badge className="bg-gray-500">Draft</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
+    }
+  };
+
+  const pendingReports = reports.filter((r) => r.status === 'SUBMITTED');
+  const reviewedReports = reports.filter((r) => r.status !== 'SUBMITTED' && r.status !== 'DRAFT');
+
+  return (
+    <DashboardLayout>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+      >
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <CheckCircle className="w-8 h-8 text-orange-600" />
+            Report Approvals
+          </h2>
+          <p className="text-gray-600 mt-2">Review and approve inspection reports</p>
+        </div>
+
+        {/* Pending Reports */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-orange-600" />
+              Pending Approval ({pendingReports.length})
+            </CardTitle>
+            <CardDescription>Reports awaiting your review</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {pendingReports.length === 0 ? (
+              <p className="text-center text-gray-500 py-8">No pending reports</p>
+            ) : (
+              <div className="space-y-4">
+                {pendingReports.map((report) => (
+                  <div key={report.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-semibold text-lg">{report.form.title}</h4>
+                          {getStatusBadge(report.status)}
+                        </div>
+                        <div className="text-sm text-gray-600 space-y-1">
+                          <p>Inspector: {report.inspector.name}</p>
+                          <p>Submitted: {report.submittedAt ? new Date(report.submittedAt).toLocaleString() : 'N/A'}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 ml-4">
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700"
+                          onClick={() => initiateApprove(report.id)}
+                          disabled={loading}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600 hover:bg-red-50"
+                          onClick={() => initiateReject(report.id)}
+                          disabled={loading}
+                        >
+                          <XCircle className="h-4 w-4 mr-1" />
+                          Reject
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Reviewed Reports */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Reviewed Reports ({reviewedReports.length})</CardTitle>
+            <CardDescription>Previously reviewed reports</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {reviewedReports.length === 0 ? (
+              <p className="text-center text-gray-500 py-8">No reviewed reports</p>
+            ) : (
+              <div className="space-y-4">
+                {reviewedReports.map((report) => (
+                  <div key={report.id} className="p-4 border rounded-lg">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-semibold">{report.form.title}</h4>
+                          {getStatusBadge(report.status)}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <p>Inspector: {report.inspector.name}</p>
+                          <p>Date: {new Date(report.createdAt).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Approval Confirmation */}
+        <ConfirmDialog
+          open={showApproveConfirm}
+          onOpenChange={setShowApproveConfirm}
+          title="Approve Report"
+          description="Are you sure you want to approve this report?"
+          onConfirm={handleConfirmApprove}
+          confirmText="Approve"
+          variant="default"
+        />
+
+        {/* Rejection Dialog */}
+        <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reject Report</DialogTitle>
+              <DialogDescription>Please provide a reason for rejecting this report.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <Label htmlFor="rejection-reason" className="mb-2 block">Reason for Rejection</Label>
+              <Textarea
+                id="rejection-reason"
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder="Enter details about why this report is being rejected..."
+                rows={4}
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRejectDialog(false)}>Cancel</Button>
+              <Button 
+                variant="destructive" 
+                onClick={handleConfirmReject}
+                disabled={loading || !rejectionReason.trim()}
+              >
+                Reject Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </motion.div>
+    </DashboardLayout>
+  );
+}
