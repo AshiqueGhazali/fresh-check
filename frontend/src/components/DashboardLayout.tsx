@@ -56,11 +56,11 @@ const NavContent = memo(({
       {/* Logo */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 bg-gradient-to-br from-[#15803d] to-[#22c55e] rounded-lg flex items-center justify-center flex-shrink-0">
             <ChefHat className="w-6 h-6 text-white" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-[#15803d] to-[#22c55e] bg-clip-text text-transparent truncate">
               Fresh Check
             </h1>
             <p className="text-xs text-gray-500 truncate">{user?.role.replace('_', ' ')}</p>
@@ -84,7 +84,7 @@ const NavContent = memo(({
                   className={cn(
                     'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200',
                     isActive
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
+                      ? 'bg-gradient-to-r from-[#15803d] to-[#22c55e] text-white shadow-md'
                       : 'text-gray-700 hover:bg-gray-100'
                   )}
                 >
@@ -136,11 +136,11 @@ const DashboardLayout = memo(({ children }: { children: React.ReactNode }) => {
       {/* Mobile Header */}
       <div className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-[#15803d] to-[#22c55e] rounded-lg flex items-center justify-center">
             <ChefHat className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-lg font-bold bg-gradient-to-r from-[#15803d] to-[#22c55e] bg-clip-text text-transparent">
               Fresh Check
             </h1>
           </div>

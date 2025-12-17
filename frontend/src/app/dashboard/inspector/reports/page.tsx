@@ -136,7 +136,7 @@ export default function InspectorReportsPage() {
                         </Button>
                         <Button
                           size="sm"
-                          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                          className="bg-gradient-to-r from-[#15803d] to-[#22c55e] hover:from-blue-700 hover:to-purple-700"
                           onClick={() => initiateSubmit(report.id)}
                           disabled={loading}
                         >

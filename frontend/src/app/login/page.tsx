@@ -72,12 +72,12 @@ export default function LoginPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center shadow-lg"
+              className="mx-auto w-16 h-16 bg-gradient-to-br from-[#15803d] to-[#22c55e] rounded-full flex items-center justify-center shadow-lg"
             >
               <ChefHat className="w-8 h-8 text-white" />
             </motion.div>
             <div className="text-center">
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-[#15803d] to-[#22c55e] bg-clip-text text-transparent">
                 Fresh Check
               </CardTitle>
               <CardDescription className="text-base mt-2">
@@ -143,7 +143,7 @@ export default function LoginPage() {
               >
                 <Button
                   type="submit"
-                  className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="w-full h-11 bg-gradient-to-r from-[#15803d] to-[#22c55e] hover:from-blue-700 hover:to-purple-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
                   disabled={loading}
                 >
                   {loading ? (

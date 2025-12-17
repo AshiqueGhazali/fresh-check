@@ -102,7 +102,7 @@ export default function InspectorFormsPage() {
                       </div>
                     </div>
                     <Button
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      className="w-full bg-gradient-to-r from-[#15803d] to-[#22c55e] hover:from-blue-700 hover:to-purple-700"
                       onClick={() => handleStartInspection(form.id, form.title)}
                       disabled={loading}
                     >
