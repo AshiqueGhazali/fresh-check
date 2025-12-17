@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { ChefHat, Shield, BarChart3, ArrowRight, Sparkles, Clock, Zap } from 'lucide-react';
+import { ChefHat, Shield, BarChart3, ArrowRight, Clock } from 'lucide-react';
 import Link from 'next/link';
 
 export default function HomePage() {
