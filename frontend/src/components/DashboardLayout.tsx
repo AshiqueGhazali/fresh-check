@@ -98,7 +98,7 @@ const NavContent = memo(({
       </nav>
 
       {/* User Section */}
-      <div className="p-4 border-t border-gray-200 space-y-2">
+      <div className="p-4 border-t border-gray-200 flex flex-col gap-2">
         <Link href="/dashboard/settings" onClick={onLinkClick}>
           <Button variant="outline" className="w-full justify-start gap-2">
             <Settings className="w-4 h-4" />

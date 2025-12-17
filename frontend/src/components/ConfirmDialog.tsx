@@ -1,15 +1,6 @@
 'use client';
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import SpringModal from "./ui/SpringModal";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -33,22 +24,32 @@ export function ConfirmDialog({
   variant = 'default',
 }: ConfirmDialogProps) {
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{cancelText}</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={onConfirm}
-            className={variant === 'destructive' ? 'bg-red-600 hover:bg-red-700' : ''}
+    <SpringModal isOpen={open} onClose={()=>onOpenChange(false)}>
+      <div className="bg-white border-2 border-gray-200 max-w-[440px] rounded-[5px] flex items-center justify-between flex-col gap-4 p-4">
+        <div>
+          <p className="text-black font-semibold text-center text-[24px]">
+            {title}
+          </p>
+          
+          <p className="text-gray-400 font-normal text-[14px] text-center max-w-[400px] break-all whitespace-pre-wrap">
+            {description}
+          </p>
+        </div>
+        <div className="flex gap-4 mt-4">
+          <button
+            onClick={()=>onOpenChange(false)}
+            className="w-[190px] h-[50px] rounded-[5px] bg-[#05222C] text-white font-semibold text-[16px]  outline-none text-text"
           >
-            {confirmText}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="w-[190px] h-[50px] rounded-[5px] bg-green-600 font-semibold text-[16px]  outline-none text-white"
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    </SpringModal>
   );
 }
