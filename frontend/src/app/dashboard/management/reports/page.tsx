@@ -36,18 +36,27 @@ interface Report {
   reviewedAt: string | null;
 }
 
+import { SearchInput } from "@/components/ui/SearchInput";
+import { Pagination } from "@/components/ui/Pagination";
+
 export default function ManagementReportsPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetchReports();
-  }, []);
+  }, [page, search]);
 
   const fetchReports = async () => {
     try {
-      const response = await api.get("/reports");
-      setReports(response.data);
+      const response = await api.get("/reports", {
+        params: { page, limit: 10, search }
+      });
+      setReports(response.data.data);
+      setTotalPages(response.data.meta.totalPages);
     } catch (error) {
       console.error("Error fetching reports:", error);
     }
@@ -64,6 +73,10 @@ export default function ManagementReportsPage() {
           title="Approved Reports"
           description="View approved inspection reports"
         />
+
+        <div className="flex justify-between items-center">
+            <SearchInput value={search} onChange={(val) => { setSearch(val); setPage(1); }} />
+        </div>
 
         <Card>
           <CardHeader>
@@ -125,6 +138,9 @@ export default function ManagementReportsPage() {
                   </div>
                 ))}
               </div>
+            )}
+            {totalPages > 1 && (
+                <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
             )}
           </CardContent>
         </Card>

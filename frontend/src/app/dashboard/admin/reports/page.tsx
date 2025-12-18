@@ -28,22 +28,33 @@ import { motion } from "framer-motion";
 import api from "@/lib/api";
 import DashboardHeader from "@/components/ui/DashboardHeader";
 
+import ReportDetailsPanel from "@/components/ReportDetailsPanel";
+
 interface Report {
   id: number;
   status: string;
+  data: string;
+  remarks: string | null;
   form: {
     title: string;
+    questions: string;
   };
   inspector: {
     name: string;
   };
+  reviewedBy?: {
+    name: string;
+  };
   createdAt: string;
   submittedAt: string | null;
+  reviewedAt: string | null;
+  aiSummary?: string | null;
 }
 
 export default function ReportsApprovalPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
 
   // Approval states
   const [reportToApprove, setReportToApprove] = useState<number | null>(null);
@@ -61,7 +72,7 @@ export default function ReportsApprovalPage() {
   const fetchReports = async () => {
     try {
       const response = await api.get("/reports");
-      setReports(response.data);
+      setReports(response.data.data || response.data);
     } catch (error) {
       console.error("Error fetching reports:", error);
       toast.error("Failed to load reports");
@@ -137,10 +148,10 @@ export default function ReportsApprovalPage() {
     }
   };
 
-  const pendingReports = reports.filter((r) => r.status === "SUBMITTED");
-  const reviewedReports = reports.filter(
+  const pendingReports = Array.isArray(reports) ? reports.filter((r) => r.status === "SUBMITTED") : [];
+  const reviewedReports = Array.isArray(reports) ? reports.filter(
     (r) => r.status !== "SUBMITTED" && r.status !== "DRAFT"
-  );
+  ) : [];
 
   return (
     <DashboardLayout>
@@ -151,7 +162,7 @@ export default function ReportsApprovalPage() {
       >
         <DashboardHeader
           title="Report Approvals"
-          description="Review and approve inspection reports"
+          description="Review and approve inspection reports - Click on a report to view details"
         />
 
         {/* Pending Reports */}
@@ -173,7 +184,8 @@ export default function ReportsApprovalPage() {
                 {pendingReports.map((report) => (
                   <div
                     key={report.id}
-                    className="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                    className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() => setSelectedReport(report)}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -197,7 +209,7 @@ export default function ReportsApprovalPage() {
                         <Button
                           size="sm"
                           className="bg-green-600 hover:bg-green-700"
-                          onClick={() => initiateApprove(report.id)}
+                          onClick={(e) => { e.stopPropagation(); initiateApprove(report.id); }}
                           disabled={loading}
                         >
                           <CheckCircle className="h-4 w-4 mr-1" />
@@ -207,7 +219,7 @@ export default function ReportsApprovalPage() {
                           size="sm"
                           variant="outline"
                           className="text-red-600 hover:bg-red-50"
-                          onClick={() => initiateReject(report.id)}
+                          onClick={(e) => { e.stopPropagation(); initiateReject(report.id); }}
                           disabled={loading}
                         >
                           <XCircle className="h-4 w-4 mr-1" />
@@ -236,7 +248,7 @@ export default function ReportsApprovalPage() {
             ) : (
               <div className="space-y-4">
                 {reviewedReports.map((report) => (
-                  <div key={report.id} className="p-4 border rounded-lg">
+                  <div key={report.id} className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedReport(report)}>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
@@ -309,6 +321,11 @@ export default function ReportsApprovalPage() {
           </DialogContent>
         </Dialog>
       </motion.div>
+      
+      <ReportDetailsPanel 
+        report={selectedReport} 
+        onClose={() => setSelectedReport(null)} 
+      />
     </DashboardLayout>
   );
 }

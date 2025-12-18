@@ -41,7 +41,7 @@ export default function KitchenReportsPage() {
   const fetchReports = async () => {
     try {
       const response = await api.get('/reports');
-      setReports(response.data);
+      setReports(response.data.data || response.data);
     } catch (error) {
       console.error('Error fetching reports:', error);
     }

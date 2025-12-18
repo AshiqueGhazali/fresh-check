@@ -2,10 +2,16 @@ import { Response } from 'express';
 import prisma from '../utils/prisma';
 import { AuthRequest } from '../middleware/auth.middleware';
 
+import { generateReportSummary } from '../services/ai.service';
+
 export const getAllReports = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userRole = req.user?.role;
     const userId = req.user?.id;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string || '';
+    const skip = (page - 1) * limit;
 
     let where: any = {};
 
@@ -19,32 +25,52 @@ export const getAllReports = async (req: AuthRequest, res: Response): Promise<vo
     }
     // Admins see all reports
 
-    const reports = await prisma.inspectionReport.findMany({
-      where,
-      include: {
-        form: {
-          select: {
-            title: true,
-            questions: true,
-          },
-        },
-        inspector: {
-          select: {
-            name: true,
-          },
-        },
-        reviewedBy: {
-          select: {
-            name: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    if (search) {
+      where.OR = [
+        { form: { title: { contains: search } } },
+        { inspector: { name: { contains: search } } }
+      ];
+    }
 
-    res.json(reports);
+    const [reports, total] = await prisma.$transaction([
+      prisma.inspectionReport.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          form: {
+            select: {
+              title: true,
+              questions: true,
+            },
+          },
+          inspector: {
+            select: {
+              name: true,
+            },
+          },
+          reviewedBy: {
+            select: {
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      prisma.inspectionReport.count({ where })
+    ]);
+
+    res.json({
+      data: reports,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     console.error('Get reports error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -154,7 +180,7 @@ export const submitReport = async (req: AuthRequest, res: Response): Promise<voi
   const { id } = req.params;
 
   try {
-    const report = await prisma.inspectionReport.update({
+    let report = await prisma.inspectionReport.update({
       where: { id: parseInt(id) },
       data: {
         status: 'SUBMITTED',
@@ -173,6 +199,24 @@ export const submitReport = async (req: AuthRequest, res: Response): Promise<voi
         },
       },
     });
+
+    // AI Summary Generation
+    try {
+      const aiResponse = await generateReportSummary(report.data);
+      report = await prisma.inspectionReport.update({
+        where: { id: report.id },
+        data: {
+          aiSummary: aiResponse.summary
+        },
+        include: {
+          form: { select: { title: true } },
+          inspector: { select: { name: true } }
+        }
+      });
+    } catch (aiError) {
+      console.error("AI Summary generation failed:", aiError);
+      // Continue without summary
+    }
 
     res.json(report);
   } catch (error) {

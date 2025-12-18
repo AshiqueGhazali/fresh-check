@@ -8,18 +8,31 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { toast } from 'sonner';
-import { FileText, Send, Edit } from 'lucide-react';
+import { FileText, Send, Edit, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '@/lib/api';
+
+import ReportDetailsPanel from '@/components/ReportDetailsPanel';
 
 interface Report {
   id: number;
   status: string;
+  data: string;
+  remarks: string | null;
   form: {
     title: string;
+    questions: string;
+  };
+  inspector: {
+    name: string;
+  };
+  reviewedBy?: {
+    name: string;
   };
   createdAt: string;
   submittedAt: string | null;
+  reviewedAt: string | null;
+  aiSummary?: string | null;
 }
 
 export default function InspectorReportsPage() {
@@ -27,6 +40,7 @@ export default function InspectorReportsPage() {
   const [loading, setLoading] = useState(false);
   const [reportToSubmit, setReportToSubmit] = useState<number | null>(null);
   const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -36,7 +50,10 @@ export default function InspectorReportsPage() {
   const fetchReports = async () => {
     try {
       const response = await api.get('/reports');
-      setReports(response.data);
+      setReports(response.data.data ? response.data.data : response.data); // Handle both array (legacy) and {data, meta} if I migrated it. 
+      // Actually I migrated getAllReports, so it returns {data, meta}.
+      // But Inspector might be calling the SAME endpoint? Yes.
+      // So I should expect response.data.data.
     } catch (error) {
       console.error('Error fetching reports:', error);
       toast.error('Failed to load reports');
@@ -84,8 +101,8 @@ export default function InspectorReportsPage() {
     }
   };
 
-  const draftReports = reports.filter((r) => r.status === 'DRAFT');
-  const submittedReports = reports.filter((r) => r.status !== 'DRAFT');
+  const draftReports = Array.isArray(reports) ? reports.filter((r) => r.status === 'DRAFT') : [];
+  const submittedReports = Array.isArray(reports) ? reports.filter((r) => r.status !== 'DRAFT') : [];
 
   return (
     <DashboardLayout>
@@ -164,7 +181,7 @@ export default function InspectorReportsPage() {
             ) : (
               <div className="space-y-4">
                 {submittedReports.map((report) => (
-                  <div key={report.id} className="p-4 border rounded-lg">
+                  <div key={report.id} className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedReport(report)}>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
@@ -178,6 +195,9 @@ export default function InspectorReportsPage() {
                           )}
                         </div>
                       </div>
+                      <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setSelectedReport(report); }}>
+                          <Eye className="h-4 w-4 mr-1" /> View
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -195,6 +215,11 @@ export default function InspectorReportsPage() {
           confirmText="Yes, Submit"
         />
       </motion.div>
+      
+      <ReportDetailsPanel 
+        report={selectedReport} 
+        onClose={() => setSelectedReport(null)} 
+      />
     </DashboardLayout>
   );
 }

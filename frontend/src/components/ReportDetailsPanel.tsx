@@ -31,6 +31,7 @@ interface Report {
   createdAt: string;
   submittedAt: string | null;
   reviewedAt: string | null;
+  aiSummary?: string | null;
 }
 
 interface ReportDetailsPanelProps {
@@ -131,6 +132,18 @@ export default function ReportDetailsPanel({
                         {report.status}
                       </Badge>
                     </div>
+                    
+                    {report.aiSummary && (
+                      <div className="col-span-1 bg-purple-50 p-4 rounded-lg border border-purple-100">
+                        <h4 className="text-sm font-semibold text-purple-900 mb-1 flex items-center gap-2">
+                          ✨ AI Summary & Evaluation
+                        </h4>
+                        <p className="text-sm text-purple-800 leading-relaxed">
+                          {report.aiSummary}
+                        </p>
+                      </div>
+                    )}
+
                     <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
                       <span className="text-sm sm:text-base text-gray-600">
                         Inspector:

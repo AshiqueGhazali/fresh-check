@@ -95,14 +95,11 @@ export default function FormsManagementPage() {
   const handleCreateForm = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (formData.questions.length === 0) {
-      toast.error('Please add at least one question');
-      return;
-    }
+    // Auto-remove empty questions
+    const validQuestions = formData.questions.filter(q => q.text.trim().length > 0);
 
-    const emptyQuestions = formData.questions.filter(q => !q.text.trim());
-    if (emptyQuestions.length > 0) {
-      toast.error('Please fill in all question texts');
+    if (validQuestions.length === 0) {
+      toast.error('Please add at least one valid question');
       return;
     }
 
@@ -110,7 +107,7 @@ export default function FormsManagementPage() {
     try {
       await api.post('/forms', {
         title: formData.title,
-        questions: formData.questions,
+        questions: validQuestions,
       });
       setIsCreateDialogOpen(false);
       setFormData({ title: '', questions: [] });
@@ -137,8 +134,11 @@ export default function FormsManagementPage() {
     e.preventDefault();
     if (!selectedForm) return;
 
-    if (formData.questions.length === 0) {
-      toast.error('Please add at least one question');
+    // Auto-remove empty questions
+    const validQuestions = formData.questions.filter(q => q.text.trim().length > 0);
+
+    if (validQuestions.length === 0) {
+      toast.error('Please add at least one valid question');
       return;
     }
 
@@ -146,7 +146,7 @@ export default function FormsManagementPage() {
     try {
       await api.put(`/forms/${selectedForm.id}`, {
         title: formData.title,
-        questions: formData.questions,
+        questions: validQuestions,
       });
       setIsEditDialogOpen(false);
       setSelectedForm(null);

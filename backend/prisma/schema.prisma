@@ -58,6 +58,7 @@ model InspectionReport {
   reviewedBy    User?    @relation("ReviewerReports", fields: [reviewedById], references: [id])
   reviewedById  Int?
   reviewedAt    DateTime?
+  aiSummary     String?
 }
 
 model Guideline {

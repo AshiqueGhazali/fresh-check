@@ -58,6 +58,9 @@ interface User {
   createdAt: string;
 }
 
+import { SearchInput } from "@/components/ui/SearchInput";
+import { Pagination } from "@/components/ui/Pagination";
+
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -73,15 +76,22 @@ export default function UsersManagementPage() {
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [page, search]);
 
   const fetchUsers = async () => {
     try {
-      const response = await api.get("/users");
-      setUsers(response.data);
+      const response = await api.get("/users", {
+        params: { page, limit: 10, search }
+      });
+      setUsers(response.data.data);
+      setTotalPages(response.data.meta.totalPages);
     } catch (error) {
       console.error("Error fetching users:", error);
       toast.error("Failed to load users");
@@ -183,7 +193,9 @@ export default function UsersManagementPage() {
             title="User Management"
             description="Create and manage system users"
           />
-          <Dialog
+          <div className="flex gap-4 items-center">
+             <SearchInput value={search} onChange={(val) => { setSearch(val); setPage(1); }} />
+             <Dialog
             open={isCreateDialogOpen}
             onOpenChange={setIsCreateDialogOpen}
           >
@@ -272,6 +284,7 @@ export default function UsersManagementPage() {
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         <Card>
@@ -331,6 +344,9 @@ export default function UsersManagementPage() {
                 ))}
               </TableBody>
             </Table>
+            {totalPages > 1 && (
+                <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+            )}
           </CardContent>
         </Card>
 
