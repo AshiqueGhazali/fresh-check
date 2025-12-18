@@ -29,7 +29,7 @@ model InspectionForm {
   id        Int      @id @default(autoincrement())
   title     String
   version   Int      @default(1)
-  questions String   // JSON string: Array of questions {id, text, type, options?, guidelineId?}
+  questions String   @db.LongText // JSON string: Array of questions {id, text, type, options?, guidelineId?}
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -42,9 +42,9 @@ model InspectionForm {
 model InspectionReport {
   id          Int      @id @default(autoincrement())
   status      String   @default("DRAFT") // DRAFT, SUBMITTED, APPROVED, REJECTED
-  data        String   // JSON string: Answers {questionId: answer}
+  data        String   @db.LongText // JSON string: Answers {questionId: answer}
   score       Float?
-  remarks     String?
+  remarks     String?  @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   submittedAt DateTime?
@@ -58,7 +58,7 @@ model InspectionReport {
   reviewedBy    User?    @relation("ReviewerReports", fields: [reviewedById], references: [id])
   reviewedById  Int?
   reviewedAt    DateTime?
-  aiSummary     String?
+  aiSummary     String?  @db.Text
 }
 
 model Guideline {
