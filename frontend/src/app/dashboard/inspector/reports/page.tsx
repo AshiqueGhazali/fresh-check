@@ -13,6 +13,10 @@ import { motion } from 'framer-motion';
 import api from '@/lib/api';
 
 import ReportDetailsPanel from '@/components/ReportDetailsPanel';
+import { SearchInput } from "@/components/ui/SearchInput";
+import { Pagination } from "@/components/ui/Pagination";
+import DashboardHeader from "@/components/ui/DashboardHeader";
+
 
 interface Report {
   id: number;
@@ -43,17 +47,21 @@ export default function InspectorReportsPage() {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const router = useRouter();
 
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
+
   useEffect(() => {
     fetchReports();
-  }, []);
+  }, [page, search]);
 
   const fetchReports = async () => {
     try {
-      const response = await api.get('/reports');
-      setReports(response.data.data ? response.data.data : response.data); // Handle both array (legacy) and {data, meta} if I migrated it. 
-      // Actually I migrated getAllReports, so it returns {data, meta}.
-      // But Inspector might be calling the SAME endpoint? Yes.
-      // So I should expect response.data.data.
+      const response = await api.get('/reports', {
+        params: { page, limit: 10, search }
+      });
+      setReports(response.data.data);
+      setTotalPages(response.data.meta.totalPages);
     } catch (error) {
       console.error('Error fetching reports:', error);
       toast.error('Failed to load reports');
@@ -101,9 +109,6 @@ export default function InspectorReportsPage() {
     }
   };
 
-  const draftReports = Array.isArray(reports) ? reports.filter((r) => r.status === 'DRAFT') : [];
-  const submittedReports = Array.isArray(reports) ? reports.filter((r) => r.status !== 'DRAFT') : [];
-
   return (
     <DashboardLayout>
       <motion.div
@@ -111,54 +116,70 @@ export default function InspectorReportsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6"
       >
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <FileText className="w-8 h-8 text-purple-600" />
-            My Reports
-          </h2>
-          <p className="text-gray-600 mt-2">View and manage your inspection reports</p>
+        <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center">
+            <DashboardHeader title='My Reports' description='View and manage your inspection reports'/>
+            <SearchInput
+                value={search}
+                onChange={(val) => {
+                setSearch(val);
+                setPage(1);
+                }}
+            />
         </div>
 
-        {/* Draft Reports */}
         <Card>
           <CardHeader>
-            <CardTitle>Draft Reports ({draftReports.length})</CardTitle>
-            <CardDescription>Reports not yet submitted - click Edit to fill in details</CardDescription>
+            <CardTitle>All Reports</CardTitle>
+            <CardDescription>Drafts, Submitted, and Reviewed Reports</CardDescription>
           </CardHeader>
           <CardContent>
-            {draftReports.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">No draft reports</p>
+            {reports.length === 0 ? (
+              <p className="text-center text-gray-500 py-8">No reports found</p>
             ) : (
               <div className="space-y-4">
-                {draftReports.map((report) => (
-                  <div key={report.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
+                {reports.map((report) => (
+                  <div key={report.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => setSelectedReport(report)}>
+                    <div className="flex items-start justify-between flex-wrap gap-4">
+                      <div className="flex-1 min-w-[200px]">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
                           <h4 className="font-semibold text-lg">{report.form.title}</h4>
                           {getStatusBadge(report.status)}
                         </div>
-                        <p className="text-sm text-gray-600">
-                          Created: {new Date(report.createdAt).toLocaleString()}
-                        </p>
+                        <div className="text-sm text-gray-600 space-y-1">
+                          <p>Created: {new Date(report.createdAt).toLocaleString()}</p>
+                           {report.submittedAt && (
+                                <p>Submitted: {new Date(report.submittedAt).toLocaleDateString()}</p>
+                           )}
+                        </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEdit(report.id)}
-                        >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="bg-gradient-to-r from-[#047857] to-[#10b981] hover:from-[#10b981] hover:to-[#047857]"
-                          onClick={() => initiateSubmit(report.id)}
-                          disabled={loading}
-                        >
-                          <Send className="h-4 w-4 mr-1" />
-                          Submit
+                        {report.status === 'DRAFT' && (
+                            <>
+                                <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => { e.stopPropagation(); handleEdit(report.id); }}
+                                >
+                                <Edit className="h-4 w-4 mr-1" />
+                                Edit
+                                </Button>
+                                <Button
+                                size="sm"
+                                className="bg-gradient-to-r from-[#047857] to-[#10b981] hover:from-[#10b981] hover:to-[#047857]"
+                                onClick={(e) => { e.stopPropagation(); initiateSubmit(report.id); }}
+                                disabled={loading}
+                                >
+                                <Send className="h-4 w-4 mr-1" />
+                                Submit
+                                </Button>
+                            </>
+                        )}
+                        {/* Only show View button if NOT draft, or maybe always? 
+                            Drafts are editable, others are viewable details panel.
+                            Actually, DetailsPanel works for drafts too (shows current state).
+                        */}
+                         <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); setSelectedReport(report); }}>
+                            <Eye className="h-4 w-4 mr-1" /> Details
                         </Button>
                       </div>
                     </div>
@@ -166,42 +187,13 @@ export default function InspectorReportsPage() {
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Submitted Reports */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Submitted Reports ({submittedReports.length})</CardTitle>
-            <CardDescription>Reports under review or completed</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {submittedReports.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">No submitted reports</p>
-            ) : (
-              <div className="space-y-4">
-                {submittedReports.map((report) => (
-                  <div key={report.id} className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedReport(report)}>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-semibold">{report.form.title}</h4>
-                          {getStatusBadge(report.status)}
-                        </div>
-                        <div className="text-sm text-gray-600 space-y-1">
-                          <p>Created: {new Date(report.createdAt).toLocaleDateString()}</p>
-                          {report.submittedAt && (
-                            <p>Submitted: {new Date(report.submittedAt).toLocaleDateString()}</p>
-                          )}
-                        </div>
-                      </div>
-                      <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setSelectedReport(report); }}>
-                          <Eye className="h-4 w-4 mr-1" /> View
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
             )}
           </CardContent>
         </Card>

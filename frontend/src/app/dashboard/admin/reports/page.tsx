@@ -29,6 +29,8 @@ import api from "@/lib/api";
 import DashboardHeader from "@/components/ui/DashboardHeader";
 
 import ReportDetailsPanel from "@/components/ReportDetailsPanel";
+import { SearchInput } from "@/components/ui/SearchInput";
+import { Pagination } from "@/components/ui/Pagination";
 
 interface Report {
   id: number;
@@ -56,6 +58,11 @@ export default function ReportsApprovalPage() {
   const [loading, setLoading] = useState(false);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
 
+  // Pagination & Search settings
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
+
   // Approval states
   const [reportToApprove, setReportToApprove] = useState<number | null>(null);
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
@@ -67,12 +74,15 @@ export default function ReportsApprovalPage() {
 
   useEffect(() => {
     fetchReports();
-  }, []);
+  }, [page, search]);
 
   const fetchReports = async () => {
     try {
-      const response = await api.get("/reports");
-      setReports(response.data.data || response.data);
+      const response = await api.get("/reports", {
+        params: { page, limit: 10, search },
+      });
+      setReports(response.data.data);
+      setTotalPages(response.data.meta.totalPages);
     } catch (error) {
       console.error("Error fetching reports:", error);
       toast.error("Failed to load reports");
@@ -160,10 +170,19 @@ export default function ReportsApprovalPage() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6"
       >
-        <DashboardHeader
-          title="Report Approvals"
-          description="Review and approve inspection reports - Click on a report to view details"
-        />
+        <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center">
+          <DashboardHeader
+            title="Report Approvals"
+            description="Review and approve inspection reports - Click on a report to view details"
+          />
+          <SearchInput
+            value={search}
+            onChange={(val) => {
+              setSearch(val);
+              setPage(1);
+            }}
+          />
+        </div>
 
         {/* Pending Reports */}
         <Card>
@@ -270,6 +289,15 @@ export default function ReportsApprovalPage() {
                   </div>
                 ))}
               </div>
+            )}
+            
+            {/* Global Pagination for the list */}
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
             )}
           </CardContent>
         </Card>

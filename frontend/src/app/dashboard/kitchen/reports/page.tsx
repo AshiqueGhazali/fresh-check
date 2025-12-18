@@ -9,6 +9,8 @@ import { motion } from 'framer-motion';
 import api from '@/lib/api';
 import DashboardHeader from '@/components/ui/DashboardHeader';
 import ReportDetailsPanel from '@/components/ReportDetailsPanel';
+import { SearchInput } from "@/components/ui/SearchInput";
+import { Pagination } from "@/components/ui/Pagination";
 
 interface Report {
   id: number;
@@ -28,20 +30,28 @@ interface Report {
   createdAt: string;
   submittedAt: string | null;
   reviewedAt: string | null;
+  aiSummary?: string | null;
 }
 
 export default function KitchenReportsPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetchReports();
-  }, []);
+  }, [page, search]);
 
   const fetchReports = async () => {
     try {
-      const response = await api.get('/reports');
-      setReports(response.data.data || response.data);
+      const response = await api.get('/reports', {
+        params: { page, limit: 10, search }
+      });
+      setReports(response.data.data);
+      setTotalPages(response.data.meta.totalPages);
     } catch (error) {
       console.error('Error fetching reports:', error);
     }
@@ -54,7 +64,16 @@ export default function KitchenReportsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6"
       >
-        <DashboardHeader title='Inspection Reports' description='View approved inspection reports'/>
+        <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center">
+            <DashboardHeader title='Inspection Reports' description='View approved inspection reports'/>
+            <SearchInput
+                value={search}
+                onChange={(val) => {
+                setSearch(val);
+                setPage(1);
+                }}
+            />
+        </div>
 
         <Card>
           <CardHeader>
@@ -101,6 +120,14 @@ export default function KitchenReportsPage() {
                   </div>
                 ))}
               </div>
+            )}
+            
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
             )}
           </CardContent>
         </Card>
