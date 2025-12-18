@@ -23,7 +23,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { CheckCircle, XCircle, Clock } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye } from "lucide-react";
 import { motion } from "framer-motion";
 import api from "@/lib/api";
 import DashboardHeader from "@/components/ui/DashboardHeader";
@@ -263,6 +263,9 @@ export default function ReportsApprovalPage() {
                           </p>
                         </div>
                       </div>
+                      <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setSelectedReport(report); }}>
+                          <Eye className="h-4 w-4 mr-1" /> View
+                      </Button>
                     </div>
                   </div>
                 ))}

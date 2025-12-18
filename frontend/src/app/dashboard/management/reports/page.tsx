@@ -53,7 +53,7 @@ export default function ManagementReportsPage() {
   const fetchReports = async () => {
     try {
       const response = await api.get("/reports", {
-        params: { page, limit: 10, search }
+        params: { page, limit: 10, search },
       });
       setReports(response.data.data);
       setTotalPages(response.data.meta.totalPages);
@@ -69,13 +69,18 @@ export default function ManagementReportsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6"
       >
-        <DashboardHeader
-          title="Approved Reports"
-          description="View approved inspection reports"
-        />
-
-        <div className="flex justify-between items-center">
-            <SearchInput value={search} onChange={(val) => { setSearch(val); setPage(1); }} />
+        <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center">
+          <DashboardHeader
+            title="Approved Reports"
+            description="View approved inspection reports"
+          />
+          <SearchInput
+            value={search}
+            onChange={(val) => {
+              setSearch(val);
+              setPage(1);
+            }}
+          />
         </div>
 
         <Card>
@@ -140,7 +145,11 @@ export default function ManagementReportsPage() {
               </div>
             )}
             {totalPages > 1 && (
-                <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
             )}
           </CardContent>
         </Card>
