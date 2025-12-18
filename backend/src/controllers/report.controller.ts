@@ -25,6 +25,7 @@ export const getAllReports = async (req: AuthRequest, res: Response): Promise<vo
         form: {
           select: {
             title: true,
+            questions: true,
           },
         },
         inspector: {
