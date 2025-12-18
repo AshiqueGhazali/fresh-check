@@ -258,7 +258,7 @@ export default function FillReportPage() {
           <Button
             onClick={validateAndPromptSubmit}
             disabled={loading}
-            className="bg-gradient-to-r from-[#047857] to-[#10b981] hover:from-blue-700 hover:to-purple-700"
+            className="bg-gradient-to-r from-[#047857] to-[#10b981] hover:from-[#10b981] hover:to-[#047857]"
           >
             <Send className="h-4 w-4 mr-2" />
             Submit for Review

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { BookOpen, Search } from 'lucide-react';
 import api from '@/lib/api';
+import DashboardHeader from '@/components/ui/DashboardHeader';
 
 interface Guideline {
   id: number;
@@ -58,13 +59,23 @@ export default function KitchenManagerDashboard() {
     }
   };
 
+  const getBorderColor = (severity: string) => {
+    switch (severity) {
+      case 'CRITICAL':
+        return 'border-l-6 border-l-red-500';
+      case 'MAJOR':
+        return 'border-l-6 border-l-orange-500';
+      case 'MINOR':
+        return 'border-l-6 border-l-yellow-500';
+      default:
+        return 'border-l-6 border-l-gray-500';
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900">Kitchen Manager Dashboard</h2>
-          <p className="text-gray-600 mt-2">Review guidelines and inspection reports</p>
-        </div>
+        <DashboardHeader title='Kitchen Manager Dashboard' description='Review guidelines and inspection reports'/>
 
         {/* Guidelines Section */}
         <Card>
@@ -96,10 +107,10 @@ export default function KitchenManagerDashboard() {
             ) : (
               <div className="space-y-4">
                 {filteredGuidelines.map((guideline) => (
-                  <div key={guideline.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <div key={guideline.id} className={`p-4 border rounded-lg hover:bg-gray-50 transition-colors ${getBorderColor(guideline.severity)}`}>
                     <div className="flex items-start justify-between mb-2">
                       <h4 className="font-semibold text-lg">{guideline.title}</h4>
-                      <Badge className={getSeverityColor(guideline.severity)}>
+                      <Badge className={`${getSeverityColor(guideline.severity)} rounded-md`}>
                         {guideline.severity}
                       </Badge>
                     </div>

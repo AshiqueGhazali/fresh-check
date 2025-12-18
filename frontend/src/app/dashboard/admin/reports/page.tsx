@@ -1,18 +1,32 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import DashboardLayout from '@/components/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ConfirmDialog } from '@/components/ConfirmDialog';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
-import { CheckCircle, XCircle, Clock } from 'lucide-react';
-import { motion } from 'framer-motion';
-import api from '@/lib/api';
+import { useState, useEffect } from "react";
+import DashboardLayout from "@/components/DashboardLayout";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { CheckCircle, XCircle, Clock } from "lucide-react";
+import { motion } from "framer-motion";
+import api from "@/lib/api";
+import DashboardHeader from "@/components/ui/DashboardHeader";
 
 interface Report {
   id: number;
@@ -30,7 +44,7 @@ interface Report {
 export default function ReportsApprovalPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(false);
-  
+
   // Approval states
   const [reportToApprove, setReportToApprove] = useState<number | null>(null);
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
@@ -38,7 +52,7 @@ export default function ReportsApprovalPage() {
   // Rejection states
   const [reportToReject, setReportToReject] = useState<number | null>(null);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState('');
+  const [rejectionReason, setRejectionReason] = useState("");
 
   useEffect(() => {
     fetchReports();
@@ -46,11 +60,11 @@ export default function ReportsApprovalPage() {
 
   const fetchReports = async () => {
     try {
-      const response = await api.get('/reports');
+      const response = await api.get("/reports");
       setReports(response.data);
     } catch (error) {
-      console.error('Error fetching reports:', error);
-      toast.error('Failed to load reports');
+      console.error("Error fetching reports:", error);
+      toast.error("Failed to load reports");
     }
   };
 
@@ -64,11 +78,13 @@ export default function ReportsApprovalPage() {
 
     setLoading(true);
     try {
-      await api.put(`/reports/${reportToApprove}/approve`, { remarks: 'Approved' });
+      await api.put(`/reports/${reportToApprove}/approve`, {
+        remarks: "Approved",
+      });
       fetchReports();
-      toast.success('Report approved successfully!');
+      toast.success("Report approved successfully!");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error approving report');
+      toast.error(error.response?.data?.message || "Error approving report");
     } finally {
       setLoading(false);
       setShowApproveConfirm(false);
@@ -78,49 +94,53 @@ export default function ReportsApprovalPage() {
 
   const initiateReject = (reportId: number) => {
     setReportToReject(reportId);
-    setRejectionReason('');
+    setRejectionReason("");
     setShowRejectDialog(true);
   };
 
   const handleConfirmReject = async () => {
     if (!reportToReject) return;
     if (!rejectionReason.trim()) {
-      toast.error('Please provide a rejection reason');
+      toast.error("Please provide a rejection reason");
       return;
     }
 
     setLoading(true);
     try {
-      await api.put(`/reports/${reportToReject}/reject`, { remarks: rejectionReason });
+      await api.put(`/reports/${reportToReject}/reject`, {
+        remarks: rejectionReason,
+      });
       fetchReports();
-      toast.success('Report rejected successfully');
+      toast.success("Report rejected successfully");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Error rejecting report');
+      toast.error(error.response?.data?.message || "Error rejecting report");
     } finally {
       setLoading(false);
       setShowRejectDialog(false);
       setReportToReject(null);
-      setRejectionReason('');
+      setRejectionReason("");
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'SUBMITTED':
-        return <Badge className="bg-orange-500">Pending Review</Badge>;
-      case 'APPROVED':
-        return <Badge className="bg-green-500">Approved</Badge>;
-      case 'REJECTED':
-        return <Badge className="bg-red-500">Rejected</Badge>;
-      case 'DRAFT':
-        return <Badge className="bg-gray-500">Draft</Badge>;
+      case "SUBMITTED":
+        return <Badge className="bg-orange-500 rounded-md">Pending Review</Badge>;
+      case "APPROVED":
+        return <Badge className="bg-green-500 rounded-md">Approved</Badge>;
+      case "REJECTED":
+        return <Badge className="bg-red-500 rounded-md">Rejected</Badge>;
+      case "DRAFT":
+        return <Badge className="bg-gray-500 rounded-md">Draft</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
   };
 
-  const pendingReports = reports.filter((r) => r.status === 'SUBMITTED');
-  const reviewedReports = reports.filter((r) => r.status !== 'SUBMITTED' && r.status !== 'DRAFT');
+  const pendingReports = reports.filter((r) => r.status === "SUBMITTED");
+  const reviewedReports = reports.filter(
+    (r) => r.status !== "SUBMITTED" && r.status !== "DRAFT"
+  );
 
   return (
     <DashboardLayout>
@@ -129,13 +149,10 @@ export default function ReportsApprovalPage() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6"
       >
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <CheckCircle className="w-8 h-8 text-orange-600" />
-            Report Approvals
-          </h2>
-          <p className="text-gray-600 mt-2">Review and approve inspection reports</p>
-        </div>
+        <DashboardHeader
+          title="Report Approvals"
+          description="Review and approve inspection reports"
+        />
 
         {/* Pending Reports */}
         <Card>
@@ -148,20 +165,32 @@ export default function ReportsApprovalPage() {
           </CardHeader>
           <CardContent>
             {pendingReports.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">No pending reports</p>
+              <p className="text-center text-gray-500 py-8">
+                No pending reports
+              </p>
             ) : (
               <div className="space-y-4">
                 {pendingReports.map((report) => (
-                  <div key={report.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <div
+                    key={report.id}
+                    className="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-semibold text-lg">{report.form.title}</h4>
+                          <h4 className="font-semibold text-lg">
+                            {report.form.title}
+                          </h4>
                           {getStatusBadge(report.status)}
                         </div>
                         <div className="text-sm text-gray-600 space-y-1">
                           <p>Inspector: {report.inspector.name}</p>
-                          <p>Submitted: {report.submittedAt ? new Date(report.submittedAt).toLocaleString() : 'N/A'}</p>
+                          <p>
+                            Submitted:{" "}
+                            {report.submittedAt
+                              ? new Date(report.submittedAt).toLocaleString()
+                              : "N/A"}
+                          </p>
                         </div>
                       </div>
                       <div className="flex gap-2 ml-4">
@@ -201,7 +230,9 @@ export default function ReportsApprovalPage() {
           </CardHeader>
           <CardContent>
             {reviewedReports.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">No reviewed reports</p>
+              <p className="text-center text-gray-500 py-8">
+                No reviewed reports
+              </p>
             ) : (
               <div className="space-y-4">
                 {reviewedReports.map((report) => (
@@ -214,7 +245,10 @@ export default function ReportsApprovalPage() {
                         </div>
                         <div className="text-sm text-gray-600">
                           <p>Inspector: {report.inspector.name}</p>
-                          <p>Date: {new Date(report.createdAt).toLocaleDateString()}</p>
+                          <p>
+                            Date:{" "}
+                            {new Date(report.createdAt).toLocaleDateString()}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -241,10 +275,14 @@ export default function ReportsApprovalPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Reject Report</DialogTitle>
-              <DialogDescription>Please provide a reason for rejecting this report.</DialogDescription>
+              <DialogDescription>
+                Please provide a reason for rejecting this report.
+              </DialogDescription>
             </DialogHeader>
             <div className="py-4">
-              <Label htmlFor="rejection-reason" className="mb-2 block">Reason for Rejection</Label>
+              <Label htmlFor="rejection-reason" className="mb-2 block">
+                Reason for Rejection
+              </Label>
               <Textarea
                 id="rejection-reason"
                 value={rejectionReason}
@@ -254,9 +292,14 @@ export default function ReportsApprovalPage() {
               />
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowRejectDialog(false)}>Cancel</Button>
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="outline"
+                onClick={() => setShowRejectDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
                 onClick={handleConfirmReject}
                 disabled={loading || !rejectionReason.trim()}
               >

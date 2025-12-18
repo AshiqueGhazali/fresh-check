@@ -68,11 +68,9 @@ export default function LoginPage() {
         </div>
       </motion.nav>
 
-      {/* Hero Section */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 overflow-auto">
         <div className="max-w-7xl w-full py-8 lg:py-0">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left Content */}
             <motion.div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
                 Food Quality
@@ -96,7 +94,6 @@ export default function LoginPage() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="grid gap-6"
             >
-              {/* Card 1 */}
               <motion.div
                 transition={{ type: "spring", stiffness: 300 }}
                 className=" rounded-2xl p-6 lg:max-w-125  border-gray-100"

@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import api from '@/lib/api';
+import DashboardHeader from '@/components/ui/DashboardHeader';
 
 
 interface Form {
@@ -66,13 +67,7 @@ export default function InspectorFormsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6"
       >
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <ClipboardList className="w-8 h-8 text-blue-600" />
-            Inspection Forms
-          </h2>
-          <p className="text-gray-600 mt-2">Select a form to start an inspection</p>
-        </div>
+        <DashboardHeader title='Inspection Forms' description='Choose a form to begin your inspection'/>
 
         <Card>
           <CardHeader>
@@ -92,7 +87,7 @@ export default function InspectorFormsPage() {
                   <motion.div
                     key={form.id}
                     whileHover={{ scale: 1.02 }}
-                    className="p-6 border-2 rounded-lg hover:border-blue-500 transition-all"
+                    className="p-6 border-2 rounded-lg hover:border-[#047857] transition-all"
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
@@ -102,7 +97,7 @@ export default function InspectorFormsPage() {
                       </div>
                     </div>
                     <Button
-                      className="w-full bg-gradient-to-r from-[#047857] to-[#10b981] hover:from-blue-700 hover:to-purple-700"
+                      className="w-full bg-linear-to-r from-[#047857] to-[#10b981] hover:from-[#10b981] hover:to-[#047857]"
                       onClick={() => handleStartInspection(form.id, form.title)}
                       disabled={loading}
                     >

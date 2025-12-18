@@ -1,12 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import DashboardLayout from '@/components/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, FileText, BookOpen, CheckSquare } from 'lucide-react';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import api from '@/lib/api';
+import { useState, useEffect } from "react";
+import DashboardLayout from "@/components/DashboardLayout";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Users, FileText, BookOpen, CheckSquare } from "lucide-react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import api from "@/lib/api";
+import DashboardHeader from "@/components/ui/DashboardHeader";
 
 interface Stats {
   totalUsers: number;
@@ -24,55 +31,55 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const response = await api.get('/stats/dashboard');
+      const response = await api.get("/stats/dashboard");
       setStats(response.data);
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      console.error("Error fetching stats:", error);
     }
   };
 
   const cards = [
     {
-      title: 'User Management',
-      description: 'Create and manage system users',
+      title: "User Management",
+      description: "Create and manage system users",
       icon: Users,
       value: stats?.totalUsers || 0,
-      href: '/dashboard/admin/users',
-      color: 'from-blue-600 to-cyan-600',
+      href: "/dashboard/admin/users",
+      color: "from-blue-600 to-cyan-600",
     },
     {
-      title: 'Inspection Forms',
-      description: 'Create and manage inspection forms',
+      title: "Inspection Forms",
+      description: "Create and manage inspection forms",
       icon: FileText,
       value: stats?.totalForms || 0,
-      href: '/dashboard/admin/forms',
-      color: 'from-purple-600 to-pink-600',
+      href: "/dashboard/admin/forms",
+      color: "from-purple-600 to-pink-600",
     },
     {
-      title: 'Guidelines',
-      description: 'Manage food quality guidelines',
+      title: "Guidelines",
+      description: "Manage food quality guidelines",
       icon: BookOpen,
       value: stats?.totalGuidelines || 0,
-      href: '/dashboard/admin/guidelines',
-      color: 'from-green-600 to-teal-600',
+      href: "/dashboard/admin/guidelines",
+      color: "from-green-600 to-teal-600",
     },
     {
-      title: 'Pending Approvals',
-      description: 'Review and approve reports',
+      title: "Pending Approvals",
+      description: "Review and approve reports",
       icon: CheckSquare,
       value: stats?.pendingApprovals || 0,
-      href: '/dashboard/admin/reports',
-      color: 'from-orange-600 to-red-600',
+      href: "/dashboard/admin/reports",
+      color: "from-orange-600 to-red-600",
     },
   ];
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900">Admin Dashboard</h2>
-          <p className="text-gray-600 mt-2">Manage users, forms, guidelines, and approvals</p>
-        </div>
+        <DashboardHeader
+          title="Admin Dashboard"
+          description="Manage users, forms, guidelines, and approvals"
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {cards.map((card, index) => (
@@ -88,15 +95,21 @@ export default function AdminDashboard() {
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <CardTitle className="text-xl">{card.title}</CardTitle>
-                        <CardDescription className="mt-1">{card.description}</CardDescription>
+                        <CardDescription className="mt-1">
+                          {card.description}
+                        </CardDescription>
                       </div>
-                      <div className={`w-12 h-12 bg-gradient-to-br ${card.color} rounded-lg flex items-center justify-center`}>
+                      <div
+                        className={`w-12 h-12 bg-gradient-to-br ${card.color} rounded-lg flex items-center justify-center`}
+                      >
                         <card.icon className="w-6 h-6 text-white" />
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold text-gray-900">{card.value}</div>
+                    <div className="text-3xl font-bold text-gray-900">
+                      {card.value}
+                    </div>
                   </CardContent>
                 </Card>
               </Link>

@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, FileText, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '@/lib/api';
+import DashboardHeader from '@/components/ui/DashboardHeader';
 
 interface Question {
   id: number;
@@ -196,7 +197,7 @@ export default function FormsManagementPage() {
           <p className="text-sm text-gray-400">Click "Add Question" to start building your form</p>
         </div>
       ) : (
-        <div className="space-y-4 max-h-96 overflow-y-auto">
+        <div className="space-y-4 max-h-96 custom-scrollbar overflow-y-auto">
           {formData.questions.map((question, index) => (
             <div key={question.id} className="p-4 border rounded-lg space-y-3">
               <div className="flex justify-between items-start">
@@ -276,22 +277,16 @@ export default function FormsManagementPage() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6"
       >
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <FileText className="w-8 h-8 text-purple-600" />
-              Inspection Forms
-            </h2>
-            <p className="text-gray-600 mt-2">Create and manage inspection forms with custom questions</p>
-          </div>
+        <div className="flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center">
+          <DashboardHeader title='Inspection Forms' description='Create and manage inspection forms with custom questions' />
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+              <Button className="bg-linear-to-r from-[#047857] to-[#10b981] hover:from-[#10b981] hover:to-[#047857]">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Form
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-3xl max-h-[90vh] scrollbar-hide overflow-y-auto">
               <form onSubmit={handleCreateForm}>
                 <DialogHeader>
                   <DialogTitle>Create Inspection Form</DialogTitle>
@@ -311,7 +306,7 @@ export default function FormsManagementPage() {
                   <QuestionBuilder />
                 </div>
                 <DialogFooter>
-                  <Button type="submit" disabled={loading}>
+                  <Button type="submit" disabled={loading} className='bg-[#047857] hover:bg-[#047857]/90'>
                     {loading ? 'Creating...' : 'Create Form'}
                   </Button>
                 </DialogFooter>
@@ -338,11 +333,8 @@ export default function FormsManagementPage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <h4 className="font-semibold text-lg">{form.title}</h4>
-                            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                              v{form.version}
-                            </span>
                             {form.isActive && (
-                              <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                              <span className="px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs font-medium">
                                 Active
                               </span>
                             )}
@@ -372,7 +364,7 @@ export default function FormsManagementPage() {
 
         {/* Edit Form Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[90vh] scrollbar-hide overflow-y-auto">
             <form onSubmit={handleUpdateForm}>
               <DialogHeader>
                 <DialogTitle>Edit Inspection Form</DialogTitle>
@@ -391,7 +383,7 @@ export default function FormsManagementPage() {
                 <QuestionBuilder />
               </div>
               <DialogFooter>
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={loading} className='bg-[#047857] hover:bg-[#047857]/90'>
                   {loading ? 'Updating...' : 'Update Form'}
                 </Button>
               </DialogFooter>

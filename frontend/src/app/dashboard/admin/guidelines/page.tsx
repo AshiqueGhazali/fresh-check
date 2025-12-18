@@ -14,6 +14,7 @@ import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, BookOpen } from 'lucide-react';
 import api from '@/lib/api';
+import DashboardHeader from '@/components/ui/DashboardHeader';
 
 interface Guideline {
   id: number;
@@ -136,14 +137,11 @@ export default function GuidelinesManagementPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900">Guidelines Management</h2>
-            <p className="text-gray-600 mt-2">Manage food quality and safety guidelines</p>
-          </div>
+        <div className="flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center">
+          <DashboardHeader title='Guidelines Management' description='Manage food quality and safety guidelines'/>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className='bg-linear-to-r from-[#047857] to-[#10b981] hover:from-[#10b981] hover:to-[#047857]'>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Guideline
               </Button>
@@ -159,6 +157,7 @@ export default function GuidelinesManagementPage() {
                     <Label htmlFor="title">Title</Label>
                     <Input
                       id="title"
+                      placeholder='Title'
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       required
@@ -168,6 +167,7 @@ export default function GuidelinesManagementPage() {
                     <Label htmlFor="content">Content</Label>
                     <Textarea
                       id="content"
+                      placeholder='write content..'
                       rows={6}
                       value={formData.content}
                       onChange={(e) => setFormData({ ...formData, content: e.target.value })}
@@ -189,7 +189,7 @@ export default function GuidelinesManagementPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button type="submit" disabled={loading}>
+                  <Button type="submit" disabled={loading} className='bg-[#047857] hover:bg-[#047857]/90'>
                     {loading ? 'Creating...' : 'Create Guideline'}
                   </Button>
                 </DialogFooter>
@@ -217,7 +217,7 @@ export default function GuidelinesManagementPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <h4 className="font-semibold text-lg">{guideline.title}</h4>
-                          <Badge className={getSeverityColor(guideline.severity)}>
+                          <Badge className={`${getSeverityColor(guideline.severity)} rounded-md`}>
                             {guideline.severity}
                           </Badge>
                         </div>
@@ -256,6 +256,7 @@ export default function GuidelinesManagementPage() {
                   <Label htmlFor="edit-title">Title</Label>
                   <Input
                     id="edit-title"
+                    placeholder='Title'
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     required
@@ -265,6 +266,7 @@ export default function GuidelinesManagementPage() {
                   <Label htmlFor="edit-content">Content</Label>
                   <Textarea
                     id="edit-content"
+                    placeholder='Write content...'
                     rows={6}
                     value={formData.content}
                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
@@ -286,7 +288,7 @@ export default function GuidelinesManagementPage() {
                 </div>
               </div>
               <DialogFooter>
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={loading} className='bg-[#047857] hover:bg-[#047857]/90'>
                   {loading ? 'Updating...' : 'Update Guideline'}
                 </Button>
               </DialogFooter>

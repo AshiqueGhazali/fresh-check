@@ -72,13 +72,13 @@ export default function InspectorReportsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'DRAFT':
-        return <Badge className="bg-gray-500">Draft</Badge>;
+        return <Badge className="bg-gray-500 rounded-md">Draft</Badge>;
       case 'SUBMITTED':
-        return <Badge className="bg-orange-500">Under Review</Badge>;
+        return <Badge className="bg-orange-500 rounded-md">Under Review</Badge>;
       case 'APPROVED':
-        return <Badge className="bg-green-500">Approved</Badge>;
+        return <Badge className="bg-green-500 rounded-md">Approved</Badge>;
       case 'REJECTED':
-        return <Badge className="bg-red-500">Rejected</Badge>;
+        return <Badge className="bg-red-500 rounded-md">Rejected</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -136,7 +136,7 @@ export default function InspectorReportsPage() {
                         </Button>
                         <Button
                           size="sm"
-                          className="bg-gradient-to-r from-[#047857] to-[#10b981] hover:from-blue-700 hover:to-purple-700"
+                          className="bg-gradient-to-r from-[#047857] to-[#10b981] hover:from-[#10b981] hover:to-[#047857]"
                           onClick={() => initiateSubmit(report.id)}
                           disabled={loading}
                         >

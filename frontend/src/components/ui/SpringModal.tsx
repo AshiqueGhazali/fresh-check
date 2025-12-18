@@ -32,7 +32,7 @@ const SpringModal:React.FC<IModalProps> = ({ isOpen, onClose,children,className 
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="bg-[#001820]/80  p-8 fixed inset-0 z-50 grid place-items-center overflow-y-scroll cursor-pointer"
+          className="bg-[#001820]/40  p-8 fixed inset-0 z-50 grid place-items-center overflow-y-scroll cursor-pointer"
         >
           <motion.div
             onClick={(e) => e.stopPropagation()}
