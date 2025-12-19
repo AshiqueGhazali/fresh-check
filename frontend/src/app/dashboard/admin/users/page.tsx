@@ -42,7 +42,6 @@ import {
   Plus,
   Pencil,
   Trash2,
-  Users as UsersIcon,
   EyeOff,
   Eye,
 } from "lucide-react";
@@ -61,6 +60,46 @@ interface User {
 import { SearchInput } from "@/components/ui/SearchInput";
 import { Pagination } from "@/components/ui/Pagination";
 
+// Custom Skeleton Component
+const Skeleton = ({ className = "" }: { className?: string }) => {
+  return (
+    <div
+      className={`animate-pulse bg-gray-200 rounded ${className}`}
+      style={{ animationDuration: "1.5s" }}
+    />
+  );
+};
+
+// Skeleton Loader Component
+const UserTableSkeleton = () => {
+  return (
+    <>
+      {[...Array(5)].map((_, index) => (
+        <TableRow key={index}>
+          <TableCell>
+            <Skeleton className="h-4 w-32" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-48" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-6 w-24 rounded-[5px]" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-24" />
+          </TableCell>
+          <TableCell className="text-right">
+            <div className="flex justify-end gap-2">
+              <Skeleton className="h-8 w-8" />
+              <Skeleton className="h-8 w-8" />
+            </div>
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
+};
+
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -73,6 +112,7 @@ export default function UsersManagementPage() {
     role: "INSPECTOR",
   });
   const [loading, setLoading] = useState(false);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -86,6 +126,7 @@ export default function UsersManagementPage() {
   }, [page, search]);
 
   const fetchUsers = async () => {
+    setIsLoadingUsers(true);
     try {
       const response = await api.get("/users", {
         params: { page, limit: 10, search },
@@ -95,6 +136,8 @@ export default function UsersManagementPage() {
     } catch (error) {
       console.error("Error fetching users:", error);
       toast.error("Failed to load users");
+    } finally {
+      setIsLoadingUsers(false);
     }
   };
 
@@ -212,7 +255,7 @@ export default function UsersManagementPage() {
                 </Button>
               </DialogTrigger>
               <DialogContent>
-                <form onSubmit={handleCreateUser}>
+                <div onSubmit={handleCreateUser}>
                   <DialogHeader>
                     <DialogTitle>Create New User</DialogTitle>
                     <DialogDescription>
@@ -249,7 +292,7 @@ export default function UsersManagementPage() {
                       <Label htmlFor="password">Password</Label>
                       <div className="relative">
                         <Input
-                          id="edit-password"
+                          id="create-password"
                           type={showPassword ? "text" : "password"}
                           placeholder="....."
                           value={formData.password}
@@ -302,14 +345,15 @@ export default function UsersManagementPage() {
                   </div>
                   <DialogFooter>
                     <Button
-                      type="submit"
+                      type="button"
+                      onClick={handleCreateUser}
                       disabled={loading}
                       className="bg-[#047857] hover:bg-[#10b981]"
                     >
                       {loading ? "Creating..." : "Create User"}
                     </Button>
                   </DialogFooter>
-                </form>
+                </div>
               </DialogContent>
             </Dialog>
           </div>
@@ -334,45 +378,49 @@ export default function UsersManagementPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded-[5px] text-xs font-medium ${
-                          roleStyles[user.role] || "bg-gray-100 text-gray-700"
-                        }`}
-                      >
-                        {user.role.replace("_", " ")}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openEditDialog(user)}
+                {isLoadingUsers ? (
+                  <UserTableSkeleton />
+                ) : (
+                  users.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">{user.name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <span
+                          className={`px-2 py-1 rounded-[5px] text-xs font-medium ${
+                            roleStyles[user.role] || "bg-gray-100 text-gray-700"
+                          }`}
                         >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => initiateDelete(user.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                          {user.role.replace("_", " ")}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(user.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEditDialog(user)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => initiateDelete(user.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
-            {totalPages > 1 && (
+            {!isLoadingUsers && totalPages > 1 && (
               <Pagination
                 currentPage={page}
                 totalPages={totalPages}
@@ -385,7 +433,7 @@ export default function UsersManagementPage() {
         {/* Edit User Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent>
-            <form onSubmit={handleEditUser}>
+            <div onSubmit={handleEditUser}>
               <DialogHeader>
                 <DialogTitle>Edit User</DialogTitle>
                 <DialogDescription>Update user information</DialogDescription>
@@ -473,14 +521,15 @@ export default function UsersManagementPage() {
               </div>
               <DialogFooter>
                 <Button
-                  type="submit"
+                  type="button"
+                  onClick={handleEditUser}
                   disabled={loading}
                   className="bg-[#047857] hover:bg-[#10b981]"
                 >
                   {loading ? "Updating..." : "Update User"}
                 </Button>
               </DialogFooter>
-            </form>
+            </div>
           </DialogContent>
         </Dialog>
 
