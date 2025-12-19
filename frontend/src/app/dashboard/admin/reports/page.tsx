@@ -31,6 +31,7 @@ import DashboardHeader from "@/components/ui/DashboardHeader";
 import ReportDetailsPanel from "@/components/ReportDetailsPanel";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { Pagination } from "@/components/ui/Pagination";
+import Skeleton from "@/components/ui/Skeleton";
 
 interface Report {
   id: number;
@@ -53,9 +54,48 @@ interface Report {
   aiSummary?: string | null;
 }
 
+
+
+// Report Card Skeleton Component
+const ReportCardSkeleton = () => {
+  return (
+    <div className="p-4 border rounded-lg">
+      <div className="flex items-start flex-col lg:flex-row gap-3 lg:justify-between">
+        <div className="flex-1 w-full">
+          <div className="flex items-center gap-2 mb-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-6 w-24 rounded-md" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-4 w-56" />
+          </div>
+        </div>
+        <div className="flex gap-2 lg:ml-4">
+          <Skeleton className="h-9 w-20" />
+          <Skeleton className="h-9 w-24" />
+          <Skeleton className="h-9 w-20" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Reports List Skeleton
+const ReportsListSkeleton = ({ count = 3 }: { count?: number }) => {
+  return (
+    <div className="space-y-4">
+      {[...Array(count)].map((_, index) => (
+        <ReportCardSkeleton key={index} />
+      ))}
+    </div>
+  );
+};
+
 export default function ReportsApprovalPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isLoadingReports, setIsLoadingReports] = useState(true);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
 
   // Pagination & Search settings
@@ -77,6 +117,7 @@ export default function ReportsApprovalPage() {
   }, [page, search]);
 
   const fetchReports = async () => {
+    setIsLoadingReports(true);
     try {
       const response = await api.get("/reports", {
         params: { page, limit: 10, search },
@@ -86,6 +127,8 @@ export default function ReportsApprovalPage() {
     } catch (error) {
       console.error("Error fetching reports:", error);
       toast.error("Failed to load reports");
+    } finally {
+      setIsLoadingReports(false);
     }
   };
 
@@ -193,12 +236,14 @@ export default function ReportsApprovalPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-orange-600" />
-              Pending Approval ({pendingReports.length})
+              Pending Approval {!isLoadingReports && `(${pendingReports.length})`}
             </CardTitle>
             <CardDescription>Reports awaiting your review</CardDescription>
           </CardHeader>
           <CardContent>
-            {pendingReports.length === 0 ? (
+            {isLoadingReports ? (
+              <ReportsListSkeleton count={3} />
+            ) : pendingReports.length === 0 ? (
               <p className="text-center text-gray-500 py-8">
                 No pending reports
               </p>
@@ -276,11 +321,15 @@ export default function ReportsApprovalPage() {
         {/* Reviewed Reports */}
         <Card>
           <CardHeader>
-            <CardTitle>Reviewed Reports ({reviewedReports.length})</CardTitle>
+            <CardTitle>
+              Reviewed Reports {!isLoadingReports && `(${reviewedReports.length})`}
+            </CardTitle>
             <CardDescription>Previously reviewed reports</CardDescription>
           </CardHeader>
           <CardContent>
-            {reviewedReports.length === 0 ? (
+            {isLoadingReports ? (
+              <ReportsListSkeleton count={3} />
+            ) : reviewedReports.length === 0 ? (
               <p className="text-center text-gray-500 py-8">
                 No reviewed reports
               </p>
@@ -323,7 +372,7 @@ export default function ReportsApprovalPage() {
             )}
 
             {/* Global Pagination for the list */}
-            {totalPages > 1 && (
+            {!isLoadingReports && totalPages > 1 && (
               <Pagination
                 currentPage={page}
                 totalPages={totalPages}

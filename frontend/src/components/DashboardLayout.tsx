@@ -4,7 +4,6 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   LogOut,
-  Settings,
   Users,
   FileText,
   BookOpen,
@@ -22,17 +21,56 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useState, useMemo, memo } from "react";
 
+// Custom Skeleton Component
+const Skeleton = ({ className = "" }: { className?: string }) => {
+  return (
+    <div
+      className={`animate-pulse bg-gray-200 rounded ${className}`}
+      style={{ animationDuration: "1.5s" }}
+    />
+  );
+};
+
+// User Info Skeleton Component
+const UserInfoSkeleton = () => {
+  return (
+    <div className="min-w-0 px-3 py-1.5 flex items-center gap-2">
+      <Skeleton className="rounded-full w-10 h-10" />
+      <div className="flex-1 min-w-0 space-y-2">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-3 w-40" />
+      </div>
+    </div>
+  );
+};
+
+// Navigation Skeleton Component
+const NavSkeleton = () => {
+  return (
+    <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+      {[...Array(4)].map((_, index) => (
+        <div key={index} className="flex items-center gap-3 px-4 py-3">
+          <Skeleton className="w-5 h-5 rounded" />
+          <Skeleton className="h-4 flex-1" />
+        </div>
+      ))}
+    </nav>
+  );
+};
+
 const NavContent = memo(
   ({
     user,
     logout,
     pathname,
     onLinkClick,
+    isLoading,
   }: {
     user: any;
     logout: () => void;
     pathname: string;
     onLinkClick: () => void;
+    isLoading?: boolean;
   }) => {
     const navItems = useMemo(() => {
       const role = user?.role;
@@ -101,10 +139,19 @@ const NavContent = memo(
       return [];
     }, [user?.role]);
 
+    if (isLoading) {
+      return (
+        <>
+          <NavSkeleton />
+          <div className="p-4 border-t border-gray-200">
+            <Skeleton className="h-10 w-full rounded-lg" />
+          </div>
+        </>
+      );
+    }
+
     return (
       <>
-        {/* Logo */}
-
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {navItems.map((item, index) => {
@@ -137,12 +184,6 @@ const NavContent = memo(
 
         {/* User Section */}
         <div className="p-4 border-t border-gray-200 flex flex-col gap-2">
-          {/* <Link href="/dashboard/settings" onClick={onLinkClick}>
-            <Button variant="outline" className="w-full justify-start gap-2">
-              <Settings className="w-4 h-4" />
-              Settings
-            </Button>
-          </Link> */}
           <Button
             variant="outline"
             onClick={logout}
@@ -163,6 +204,9 @@ const DashboardLayout = memo(({ children }: { children: React.ReactNode }) => {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Check if user data is loading
+  const isLoading = !user;
 
   return (
     <div className="min-h-screen bg-[#f4f4f5]">
@@ -176,24 +220,32 @@ const DashboardLayout = memo(({ children }: { children: React.ReactNode }) => {
               <h1 className="text-xl font-bold bg-linear-to-r from-[#047857] to-[#10b981] bg-clip-text text-transparent truncate">
                 Fresh Check
               </h1>
-              <p className="text-xs text-gray-500 truncate">
-                {user?.role.replace("_", " ")}
-              </p>
+              {isLoading ? (
+                <Skeleton className="h-3 w-24 mt-1" />
+              ) : (
+                <p className="text-xs text-gray-500 truncate">
+                  {user?.role.replace("_", " ")}
+                </p>
+              )}
             </div>
           </div>
-          <div className="min-w-0 px-3 py-1.5 flex items-center gap-2 cursor-pointer">
-            <div className="flex items-center justify-center rounded-full w-10 h-10 border-2 border-[#115e59] bg-gray-100">
-              <User className="text-[#115e59] text-[16px] font-semibold" />
+          {isLoading ? (
+            <UserInfoSkeleton />
+          ) : (
+            <div className="min-w-0 px-3 py-1.5 flex items-center gap-2 cursor-pointer">
+              <div className="flex items-center justify-center rounded-full w-10 h-10 border-2 border-[#115e59] bg-gray-100">
+                <User className="text-[#115e59] text-[16px] font-semibold" />
+              </div>
+              <div>
+                <h2 className="text-[16px] font-bold text-gray-900 truncate">
+                  {user?.name}
+                </h2>
+                <p className="text-[12px] text-gray-600 truncate">
+                  {user?.email}
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-[16px] font-bold text-gray-900 truncate">
-                {user?.name}
-              </h2>
-              <p className="text-[12px] text-gray-600 truncate">
-                {user?.email}
-              </p>
-            </div>
-          </div>
+          )}
         </div>
       </header>
       {/* Desktop Sidebar - Fixed */}
@@ -203,6 +255,7 @@ const DashboardLayout = memo(({ children }: { children: React.ReactNode }) => {
           logout={logout}
           pathname={pathname}
           onLinkClick={() => {}}
+          isLoading={isLoading}
         />
       </aside>
 
@@ -216,9 +269,13 @@ const DashboardLayout = memo(({ children }: { children: React.ReactNode }) => {
             <h1 className="text-lg font-bold bg-linear-to-r from-[#047857] to-[#10b981] bg-clip-text text-transparent">
               Fresh Check
             </h1>
-            <p className="text-xs text-gray-500 truncate">
-              {user?.role.replace("_", " ")}
-            </p>
+            {isLoading ? (
+              <Skeleton className="h-3 w-20 mt-1" />
+            ) : (
+              <p className="text-xs text-gray-500 truncate">
+                {user?.role.replace("_", " ")}
+              </p>
+            )}
           </div>
         </div>
         <Button
@@ -250,6 +307,7 @@ const DashboardLayout = memo(({ children }: { children: React.ReactNode }) => {
               logout={logout}
               pathname={pathname}
               onLinkClick={() => setMobileMenuOpen(false)}
+              isLoading={isLoading}
             />
           </motion.div>
         )}

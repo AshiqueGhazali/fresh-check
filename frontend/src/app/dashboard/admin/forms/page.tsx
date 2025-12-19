@@ -15,6 +15,7 @@ import { Plus, Pencil, Trash2, FileText, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '@/lib/api';
 import DashboardHeader from '@/components/ui/DashboardHeader';
+import Skeleton from '@/components/ui/Skeleton';
 
 interface Question {
   id: number;
@@ -36,6 +37,43 @@ interface Form {
   createdAt: string;
 }
 
+
+// Form Card Skeleton Component
+const FormCardSkeleton = () => {
+  return (
+    <div className="p-4 border rounded-lg">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-6 w-16 rounded-md" />
+          </div>
+          <Skeleton className="h-4 w-32 mb-2" />
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+        </div>
+        <div className="flex gap-2 ml-4">
+          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-8" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Forms List Skeleton
+const FormsListSkeleton = ({ count = 3 }: { count?: number }) => {
+  return (
+    <div className="space-y-4">
+      {[...Array(count)].map((_, index) => (
+        <FormCardSkeleton key={index} />
+      ))}
+    </div>
+  );
+};
+
 export default function FormsManagementPage() {
   const [forms, setForms] = useState<Form[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -46,6 +84,7 @@ export default function FormsManagementPage() {
     questions: [] as Question[],
   });
   const [loading, setLoading] = useState(false);
+  const [isLoadingForms, setIsLoadingForms] = useState(true);
   const [formToDelete, setFormToDelete] = useState<number | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -54,12 +93,15 @@ export default function FormsManagementPage() {
   }, []);
 
   const fetchForms = async () => {
+    setIsLoadingForms(true);
     try {
       const response = await api.get('/forms');
       setForms(response.data);
     } catch (error) {
       console.error('Error fetching forms:', error);
       toast.error('Failed to load forms');
+    } finally {
+      setIsLoadingForms(false);
     }
   };
 
@@ -287,30 +329,28 @@ export default function FormsManagementPage() {
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl max-h-[90vh] scrollbar-hide overflow-y-auto">
-              <form onSubmit={handleCreateForm}>
-                <DialogHeader>
-                  <DialogTitle>Create Inspection Form</DialogTitle>
-                  <DialogDescription>Build a custom inspection form with your own questions</DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-6 py-4">
-                  <div>
-                    <Label htmlFor="title">Form Title *</Label>
-                    <Input
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      placeholder="e.g., Daily Kitchen Inspection"
-                      required
-                    />
-                  </div>
-                  <QuestionBuilder />
+              <DialogHeader>
+                <DialogTitle>Create Inspection Form</DialogTitle>
+                <DialogDescription>Build a custom inspection form with your own questions</DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-6 py-4">
+                <div>
+                  <Label htmlFor="title">Form Title *</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="e.g., Daily Kitchen Inspection"
+                    required
+                  />
                 </div>
-                <DialogFooter>
-                  <Button type="submit" disabled={loading} className='bg-[#047857] hover:bg-[#047857]/90'>
-                    {loading ? 'Creating...' : 'Create Form'}
-                  </Button>
-                </DialogFooter>
-              </form>
+                <QuestionBuilder />
+              </div>
+              <DialogFooter>
+                <Button type="button" onClick={handleCreateForm} disabled={loading} className='bg-[#047857] hover:bg-[#047857]/90'>
+                  {loading ? 'Creating...' : 'Create Form'}
+                </Button>
+              </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
@@ -321,7 +361,9 @@ export default function FormsManagementPage() {
             <CardDescription>Manage inspection form templates</CardDescription>
           </CardHeader>
           <CardContent>
-            {forms.length === 0 ? (
+            {isLoadingForms ? (
+              <FormsListSkeleton count={4} />
+            ) : forms.length === 0 ? (
               <p className="text-center text-gray-500 py-8">No forms found. Create your first form!</p>
             ) : (
               <div className="space-y-4">
@@ -365,29 +407,27 @@ export default function FormsManagementPage() {
         {/* Edit Form Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="max-w-3xl max-h-[90vh] scrollbar-hide overflow-y-auto">
-            <form onSubmit={handleUpdateForm}>
-              <DialogHeader>
-                <DialogTitle>Edit Inspection Form</DialogTitle>
-                <DialogDescription>Update form title and questions</DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-6 py-4">
-                <div>
-                  <Label htmlFor="edit-title">Form Title *</Label>
-                  <Input
-                    id="edit-title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    required
-                  />
-                </div>
-                <QuestionBuilder />
+            <DialogHeader>
+              <DialogTitle>Edit Inspection Form</DialogTitle>
+              <DialogDescription>Update form title and questions</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-6 py-4">
+              <div>
+                <Label htmlFor="edit-title">Form Title *</Label>
+                <Input
+                  id="edit-title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  required
+                />
               </div>
-              <DialogFooter>
-                <Button type="submit" disabled={loading} className='bg-[#047857] hover:bg-[#047857]/90'>
-                  {loading ? 'Updating...' : 'Update Form'}
-                </Button>
-              </DialogFooter>
-            </form>
+              <QuestionBuilder />
+            </div>
+            <DialogFooter>
+              <Button type="button" onClick={handleUpdateForm} disabled={loading} className='bg-[#047857] hover:bg-[#047857]/90'>
+                {loading ? 'Updating...' : 'Update Form'}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
