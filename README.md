@@ -98,10 +98,7 @@ The system uses `gemini-2.5-flash` to process inspection notes.
 
 ## 👤 Default Credentials (from Seed)
 
-- **Admin**: `admin@freshcheck.com` / `admin123`
-- **Inspector**: `inspector@freshcheck.com` / `inspector123`
-- **Kitchen Manager**: `kitchen@freshcheck.com` / `manager123`
-- **Hotel Management**: `management@freshcheck.com` / `management123`
+- **Admin**: `admin@freshcheck.com` / `admin@freshcheck`
 
 ---
 
