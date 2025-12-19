@@ -38,6 +38,39 @@ interface Report {
 
 import { SearchInput } from "@/components/ui/SearchInput";
 import { Pagination } from "@/components/ui/Pagination";
+import Skeleton from "@/components/ui/Skeleton";
+
+const ReportCardSkeleton = () => {
+  return (
+    <div className="p-4 border rounded-lg">
+      <div className="flex items-start flex-col lg:flex-row gap-3 lg:justify-between">
+        <div className="flex-1 w-full">
+          <div className="flex items-center gap-2 mb-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-6 w-24 rounded-md" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-4 w-56" />
+          </div>
+        </div>
+        <div className="flex gap-2 lg:ml-4">
+          <Skeleton className="h-7 w-20" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ReportsListSkeleton = ({ count = 3 }: { count?: number }) => {
+  return (
+    <div className="space-y-4">
+      {[...Array(count)].map((_, index) => (
+        <ReportCardSkeleton key={index} />
+      ))}
+    </div>
+  );
+};
 
 export default function ManagementReportsPage() {
   const [reports, setReports] = useState<Report[]>([]);
@@ -45,12 +78,14 @@ export default function ManagementReportsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
+  const [loadingReports, setLoadingReports] = useState(false);
 
   useEffect(() => {
     fetchReports();
   }, [page, search]);
 
   const fetchReports = async () => {
+    setLoadingReports(true);
     try {
       const response = await api.get("/reports", {
         params: { page, limit: 10, search },
@@ -59,6 +94,8 @@ export default function ManagementReportsPage() {
       setTotalPages(response.data.meta.totalPages);
     } catch (error) {
       console.error("Error fetching reports:", error);
+    } finally {
+      setLoadingReports(false);
     }
   };
 
@@ -91,7 +128,9 @@ export default function ManagementReportsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {reports.length === 0 ? (
+            {loadingReports ? (
+              <ReportsListSkeleton count={2} />
+            ) : reports.length === 0 ? (
               <p className="text-center text-gray-500 py-8">
                 No approved reports available
               </p>
