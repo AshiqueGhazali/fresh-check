@@ -146,7 +146,9 @@ export default function ReportsApprovalPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "SUBMITTED":
-        return <Badge className="bg-orange-500 rounded-md">Pending Review</Badge>;
+        return (
+          <Badge className="bg-orange-500 rounded-md">Pending Review</Badge>
+        );
       case "APPROVED":
         return <Badge className="bg-green-500 rounded-md">Approved</Badge>;
       case "REJECTED":
@@ -158,10 +160,12 @@ export default function ReportsApprovalPage() {
     }
   };
 
-  const pendingReports = Array.isArray(reports) ? reports.filter((r) => r.status === "SUBMITTED") : [];
-  const reviewedReports = Array.isArray(reports) ? reports.filter(
-    (r) => r.status !== "SUBMITTED" && r.status !== "DRAFT"
-  ) : [];
+  const pendingReports = Array.isArray(reports)
+    ? reports.filter((r) => r.status === "SUBMITTED")
+    : [];
+  const reviewedReports = Array.isArray(reports)
+    ? reports.filter((r) => r.status !== "SUBMITTED" && r.status !== "DRAFT")
+    : [];
 
   return (
     <DashboardLayout>
@@ -206,7 +210,7 @@ export default function ReportsApprovalPage() {
                     className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                     onClick={() => setSelectedReport(report)}
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start flex-col lg:flex-row gap-3 lg:justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <h4 className="font-semibold text-lg">
@@ -224,11 +228,24 @@ export default function ReportsApprovalPage() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex gap-2 ml-4">
+                      <div className="flex gap-2 lg:ml-4">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedReport(report);
+                          }}
+                        >
+                          <Eye className="h-4 w-4 mr-1" /> View
+                        </Button>
                         <Button
                           size="sm"
                           className="bg-green-600 hover:bg-green-700"
-                          onClick={(e) => { e.stopPropagation(); initiateApprove(report.id); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            initiateApprove(report.id);
+                          }}
                           disabled={loading}
                         >
                           <CheckCircle className="h-4 w-4 mr-1" />
@@ -238,7 +255,10 @@ export default function ReportsApprovalPage() {
                           size="sm"
                           variant="outline"
                           className="text-red-600 hover:bg-red-50"
-                          onClick={(e) => { e.stopPropagation(); initiateReject(report.id); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            initiateReject(report.id);
+                          }}
                           disabled={loading}
                         >
                           <XCircle className="h-4 w-4 mr-1" />
@@ -267,7 +287,11 @@ export default function ReportsApprovalPage() {
             ) : (
               <div className="space-y-4">
                 {reviewedReports.map((report) => (
-                  <div key={report.id} className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedReport(report)}>
+                  <div
+                    key={report.id}
+                    className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                    onClick={() => setSelectedReport(report)}
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
@@ -282,15 +306,22 @@ export default function ReportsApprovalPage() {
                           </p>
                         </div>
                       </div>
-                      <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setSelectedReport(report); }}>
-                          <Eye className="h-4 w-4 mr-1" /> View
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedReport(report);
+                        }}
+                      >
+                        <Eye className="h-4 w-4 mr-1" /> View
                       </Button>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-            
+
             {/* Global Pagination for the list */}
             {totalPages > 1 && (
               <Pagination
@@ -352,10 +383,10 @@ export default function ReportsApprovalPage() {
           </DialogContent>
         </Dialog>
       </motion.div>
-      
-      <ReportDetailsPanel 
-        report={selectedReport} 
-        onClose={() => setSelectedReport(null)} 
+
+      <ReportDetailsPanel
+        report={selectedReport}
+        onClose={() => setSelectedReport(null)}
       />
     </DashboardLayout>
   );
