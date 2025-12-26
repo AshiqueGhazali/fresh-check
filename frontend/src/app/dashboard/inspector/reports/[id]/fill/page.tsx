@@ -272,6 +272,7 @@ export default function FillReportPage() {
           description="Are you sure you want to submit this report? You won't be able to make changes after submission."
           onConfirm={handleSubmit}
           confirmText="Yes, Submit"
+          isLoading={loading}
         />
       </motion.div>
     </DashboardLayout>

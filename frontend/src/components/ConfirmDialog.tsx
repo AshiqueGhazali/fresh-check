@@ -11,6 +11,7 @@ interface ConfirmDialogProps {
   confirmText?: string;
   cancelText?: string;
   variant?: 'default' | 'destructive';
+  isLoading?: boolean;
 }
 
 export function ConfirmDialog({
@@ -22,6 +23,7 @@ export function ConfirmDialog({
   confirmText = 'Confirm',
   cancelText = 'Cancel',
   variant = 'default',
+  isLoading = false,
 }: ConfirmDialogProps) {
   return (
     <SpringModal isOpen={open} onClose={()=>onOpenChange(false)}>
@@ -44,9 +46,10 @@ export function ConfirmDialog({
           </button>
           <button
             onClick={onConfirm}
-            className="w-47.5 h-10 rounded-[5px] bg-[#047857] font-medium text-[16px]  outline-none text-white"
+            disabled={isLoading}
+            className={`w-47.5 h-10 rounded-[5px]  font-medium text-[16px] ${isLoading?"bg-[#047857]/70":"bg-[#047857]"} outline-none text-white`}
           >
-            Continue
+            {isLoading?"Conforming..":"Continue"}
           </button>
         </div>
       </div>
